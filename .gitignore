@@ -1,3 +1,9 @@
+#cookies
+.\src\edge_gpt\cookies_edge.json
+
+#voice records
+*.wav
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
