@@ -2,6 +2,8 @@ from TTS.api import TTS
 
 """
 Available models: tts --list_models
+
+Mode details in https://github.com/coqui-ai/TTS
 """
 
 
