@@ -1,6 +1,8 @@
 from pydub import AudioSegment
 from pydub.playback import play
 
+PY_SSIZE_T_CLEAN = 0
+
 
 class WavPlayer:
     """
