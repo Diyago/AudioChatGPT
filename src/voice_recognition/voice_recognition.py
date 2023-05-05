@@ -1,4 +1,6 @@
 """
+More info https://github.com/openai/whisper
+
 Size	Parameters	English-only model	Multilingual model	Required VRAM	Relative speed
 tiny	39 M	tiny.en	tiny	~1 GB	~32x
 base	74 M	base.en	base	~1 GB	~16x
