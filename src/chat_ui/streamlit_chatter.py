@@ -26,12 +26,15 @@ tg_svg: Path = icons_dir / "tg.svg"
 
 # --- GENERAL SETTINGS ---
 PAGE_TITLE: str = "AudioChatGPT"
-PAGE_ICON: str = "🤖"
+PAGE_ICON: str = "⚛"
 LANG_EN: str = "En"
 LANG_RU: str = "Ru"
 AI_MODEL_OPTIONS: list[str] = [
+    "CowGPT",
     "EdgeGPT",
+
 ]
+# Add a button to create a new conversation
 
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
@@ -63,11 +66,9 @@ if "user_text" not in st.session_state:
 if "input_kind" not in st.session_state:
     st.session_state.input_kind = st.session_state.locale.input_kind_1
 if "seed" not in st.session_state:
-    st.session_state.seed = randrange(10 ** 3)  # noqa: S311
-if "costs" not in st.session_state:
-    st.session_state.costs = []
-if "total_tokens" not in st.session_state:
-    st.session_state.total_tokens = []
+    st.session_state.seed = randrange(10 ** 3)
+if 'input_field_key' not in st.session_state:
+    st.session_state['input_field_key'] = 0
 
 
 def main() -> None:

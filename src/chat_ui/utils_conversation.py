@@ -1,11 +1,15 @@
 import base64
 import os
 import pickle
+import sys
 from pathlib import Path
 from random import randrange
 
 import streamlit as st
 from streamlit_chat import message
+
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+from chats.chatters import CowGPT
 
 # from .agi.chat_gpt import create_gpt_completion
 # from .stt import show_voice_input
@@ -14,6 +18,8 @@ from constants import BUG_REPORT_URL, REPO_URL
 
 conversations_file = "conversations.pkl"
 
+bot = None
+
 
 def clear_chat() -> None:
     st.session_state.generated = []
@@ -21,8 +27,6 @@ def clear_chat() -> None:
     st.session_state.messages = []
     st.session_state.user_text = ""
     st.session_state.seed = randrange(10 ** 8)  # noqa: S311
-    st.session_state.costs = []
-    st.session_state.total_tokens = []
 
 
 def show_text_input() -> None:
@@ -34,7 +38,8 @@ def get_user_input():
         case st.session_state.locale.input_kind_1:
             show_text_input()
         case st.session_state.locale.input_kind_2:
-            print("check")
+            # todo implement
+            print("Voice_check")
             # show_voice_input()
         case _:
             show_text_input()
@@ -53,41 +58,63 @@ def show_chat_buttons() -> None:
         )
 
 
+def find_indices(list_to_check, item_to_find):
+    indices = []
+    for idx, value in enumerate(list_to_check):
+        if value == item_to_find:
+            indices.append(idx)
+    return indices
+
+
 def show_chat(ai_content: str, user_text: str) -> None:
-    if ai_content not in st.session_state.generated:
-        # store the ai content
+    past_users = find_indices(st.session_state.past, user_text)
+    past_ai = find_indices(st.session_state.generated, ai_content)
+    if len(set(past_users) & set(past_ai)) == 0:
         st.session_state.past.append(user_text)
         st.session_state.generated.append(ai_content)
     if st.session_state.generated:
+        print("\n\n\n\n\n\nLEN", len(st.session_state.generated))
         for i in range(len(st.session_state.generated)):
             message(st.session_state.past[i], is_user=True, key=str(i) + "_user", seed=st.session_state.seed)
-            message("", key=str(i), seed=st.session_state.seed)
-            st.markdown(st.session_state.generated[i])
-            st.caption(f"""
-                {st.session_state.locale.tokens_count}{st.session_state.total_tokens[i]} |
-                {st.session_state.locale.message_cost}{st.session_state.costs[i]:.5f}$
-            """, help=f"{st.session_state.locale.total_cost}{sum(st.session_state.costs):.5f}$")
+            message(st.session_state.generated[i], key=str(i), seed=st.session_state.seed)
 
 
 def show_gpt_conversation() -> None:
-    ai_content = "DUMMY_OUTPUT"
-    st.session_state.messages.append({"role": "assistant", "content": "DUMMY_OUTPUT"})
-    if ai_content:
-        show_chat(ai_content, st.session_state.user_text)
-        st.divider()
-        # show_audio_player(ai_content)
+    try:
+        gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
+        if gpt_reply:
+            show_chat(gpt_reply, st.session_state.user_text)
+            # st.divider()
+            # show_audio_player(gpt_reply)
+    except UnboundLocalError as err:
+        st.error(err)
+
+
+def create_gpt_completion(model_name, message):
+    """
+    message sample [{'role': 'system', 'content': 'You are a female helpful assistant. Answer as concisely as possible.'},
+     {'role': 'user', 'content': 'dd'}, {'role': 'user', 'content': 'dd'}]
+    """
+    global bot
+    if bot:
+        return bot.add_reply(message[1]['content'])
+    elif model_name == 'EdgeGPT':
+        return '???'
+    elif model_name == 'CowGPT':
+        bot = CowGPT(promt=message[0]['content'])
+        return bot.add_reply(message[1]['content'])
 
 
 def show_conversation() -> None:
     if st.session_state.messages:
         st.session_state.messages.append({"role": "user", "content": st.session_state.user_text})
     else:
-        ai_role = f"{st.session_state.locale.ai_role_prefix} {st.session_state.role}. {st.session_state.locale.ai_role_postfix}"  # NOQA: E501
+        ai_role = f"{st.session_state.locale.ai_role_prefix} {st.session_state.role}. {st.session_state.locale.ai_role_postfix}"
         st.session_state.messages = [
             {"role": "system", "content": ai_role},
             {"role": "user", "content": st.session_state.user_text},
         ]
-    # todo apply chatting classes show_gpt_conversation()
+    show_gpt_conversation()
 
 
 def load_conversations():

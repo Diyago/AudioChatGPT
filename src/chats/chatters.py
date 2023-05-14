@@ -58,6 +58,33 @@ class EdgeGPT(Chatter):
         return True
 
 
+class CowGPT(Chatter):
+    def __init__(self, promt=""):
+        self.is_first_reply = None
+        self.chatter = None
+        self.new_chat(promt)
+
+    def new_chat(self, promt=""):
+        if self.chatter is not None:
+            self.close_chat()
+        self.promt = promt
+        self.is_first_reply = True
+        self.chatter = "Chatbot"
+
+    def add_reply(self, message):
+        return "Moo-moo, moo-moo!!!"
+
+    def close_chat(self):
+        self.chatter = None
+        self.promt = None
+
+    def get_is_first_reply(self):
+        if self.is_first_reply == False:
+            return False
+        self.is_first_reply = False
+        return True
+
+
 async def _main():
     cookies_path = r'C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json'
     prompt = "You are an english teacher and you need to explain teachable way:"
