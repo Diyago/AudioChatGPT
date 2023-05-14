@@ -1,12 +1,18 @@
+import base64
+import os
+import pickle
+from pathlib import Path
 from random import randrange
 
 import streamlit as st
 from streamlit_chat import message
 
+# from .agi.chat_gpt import create_gpt_completion
+# from .stt import show_voice_input
+# from .tts import show_audio_player
+from constants import BUG_REPORT_URL, REPO_URL
 
-#from .agi.chat_gpt import create_gpt_completion
-#from .stt import show_voice_input
-#from .tts import show_audio_player
+conversations_file = "conversations.pkl"
 
 
 def clear_chat() -> None:
@@ -29,7 +35,7 @@ def get_user_input():
             show_text_input()
         case st.session_state.locale.input_kind_2:
             print("check")
-            #show_voice_input()
+            # show_voice_input()
         case _:
             show_text_input()
 
@@ -69,7 +75,7 @@ def show_gpt_conversation() -> None:
     if ai_content:
         show_chat(ai_content, st.session_state.user_text)
         st.divider()
-        #show_audio_player(ai_content)
+        # show_audio_player(ai_content)
 
 
 def show_conversation() -> None:
@@ -83,3 +89,64 @@ def show_conversation() -> None:
         ]
     # todo apply chatting classes show_gpt_conversation()
 
+
+def load_conversations():
+    try:
+        with open(conversations_file, "rb") as f:
+            return pickle.load(f)
+    except FileNotFoundError:
+        return []
+    except EOFError:
+        return []
+
+
+def save_conversations(conversations, current_conversation):
+    updated = False
+    for idx, conversation in enumerate(conversations):
+        if conversation == current_conversation:
+            conversations[idx] = current_conversation
+            updated = True
+            break
+    if not updated:
+        conversations.append(current_conversation)
+
+    temp_conversations_file = "temp_" + conversations_file
+    with open(temp_conversations_file, "wb") as f:
+        pickle.dump(conversations, f)
+
+    os.replace(temp_conversations_file, conversations_file)
+
+
+def delete_conversation(conversations, current_conversation):
+    for idx, conversation in enumerate(conversations):
+        conversations[idx] = current_conversation
+        break
+    conversations.remove(current_conversation)
+
+    temp_conversations_file = "temp_" + conversations_file
+    with open(temp_conversations_file, "wb") as f:
+        pickle.dump(conversations, f)
+
+    os.replace(temp_conversations_file, conversations_file)
+
+
+def exit_handler():
+    print("Exiting, saving data...")
+    # Perform cleanup operations here, like saving data or closing open files.
+    save_conversations(st.session_state.conversations, st.session_state.current_conversation)
+
+
+def show_info(icon: Path) -> None:
+    st.divider()
+
+    st.markdown(f"""### :page_with_curl: {st.session_state.locale.footer_title}""", unsafe_allow_html=True)
+    st.markdown(f"<div style='text-align: justify;'>{st.session_state.locale.responsibility_denial}</div>",
+                unsafe_allow_html=True)
+    st.markdown(f"Project [repo on github]({REPO_URL}) waiting for your :star: | [report]({BUG_REPORT_URL}) a bug")
+
+
+def render_svg(svg: Path) -> str:
+    """Renders the given svg string."""
+    with open(svg) as file:
+        b64 = base64.b64encode(file.read().encode("utf-8")).decode("utf-8")
+        return f"<img src='data:image/svg+xml;base64,{b64}'/>"

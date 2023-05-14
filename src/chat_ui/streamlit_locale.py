@@ -33,7 +33,6 @@ class Locale:
     footer_title: str
     footer_option0: str
     footer_option1: str
-    footer_option2: str
     footer_chat: str
     footer_channel: str
     responsibility_denial: str
@@ -73,11 +72,9 @@ en = Locale(
     footer_title="Support & Feedback",
     footer_option0="Chat",
     footer_option1="Info",
-    footer_option2="Donate",
     footer_chat="AudioChatGPT",
     footer_channel="AudioChatGPT",
-    responsibility_denial="""Be careful
-    """,
+    responsibility_denial="""Caution: there may be inaccuracies in the answers\n\n""",
     donates_info="""Its free to go""",
     tokens_count="Tokens count: ",
     message_cost="Message cost: ",
@@ -115,11 +112,9 @@ ru = Locale(
     footer_title="Поддержка и Обратная Связь",
     footer_option0="Чат",
     footer_option1="Инфо",
-    footer_option2="Донаты",
     footer_chat="Чат Разговорчики с ИИ",
     footer_channel="Канал Разговорчики с ИИ",
-    responsibility_denial="""Осторожно: в ответах могут быть неточности
-    """,
+    responsibility_denial="""Осторожно: в ответах могут быть неточности\n\n""",
     donates_info="""Its free to go""",
     tokens_count="Количество токенов: ",
     message_cost="Cтоимость сообщения: ",

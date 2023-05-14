@@ -10,7 +10,7 @@ from constants import HEADER_STYLES
 # from src.utils.helpers import get_files_in_dir, get_random_img
 from streamlit_locale import en, ru
 # from src.styles.menu_styles import FOOTER_STYLES, HEADER_STYLES
-from utils_conversation import get_user_input, show_chat_buttons, show_conversation
+from utils_conversation import get_user_input, show_chat_buttons, show_conversation, show_info
 
 FOOTER_STYLES: Dict[str, Dict] = {
 
@@ -25,14 +25,12 @@ img_dir: Path = assets_dir / "img"
 tg_svg: Path = icons_dir / "tg.svg"
 
 # --- GENERAL SETTINGS ---
-PAGE_TITLE: str = "AI Talks"
+PAGE_TITLE: str = "AudioChatGPT"
 PAGE_ICON: str = "🤖"
 LANG_EN: str = "En"
 LANG_RU: str = "Ru"
 AI_MODEL_OPTIONS: list[str] = [
-    "gpt-3.5-turbo",
-    "gpt-4",
-    "gpt-4-32k",
+    "EdgeGPT",
 ]
 
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
@@ -114,7 +112,6 @@ def run_agi():
         options=[
             st.session_state.locale.footer_option1,
             st.session_state.locale.footer_option0,
-            st.session_state.locale.footer_option2,
         ],
         icons=["info-circle", "chat-square-text", "piggy-bank"],  # https://icons.getbootstrap.com/
         menu_icon="cast",
@@ -125,13 +122,10 @@ def run_agi():
     match selected_footer:
         case st.session_state.locale.footer_option0:
             main()
-        # case st.session_state.locale.footer_option1:
-        #     st.image(f"{img_dir}/{get_random_img(get_files_in_dir(img_dir))}")
-        #     show_info(tg_svg)
-        # case st.session_state.locale.footer_option2:
-        #     show_donates()
-        # case _:
-        #     show_info(tg_svg)
+        case st.session_state.locale.footer_option1:
+            show_info(tg_svg)
+        case _:
+            show_info(tg_svg)
 
 
 if __name__ == "__main__":
