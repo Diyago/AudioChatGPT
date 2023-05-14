@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 from abc import ABC, abstractmethod
 
 from EdgeGPT import Chatbot, ConversationStyle
@@ -26,8 +27,11 @@ class Chatter(ABC):
 class EdgeGPT(Chatter):
     def __init__(self, cookies_path, promt):
         self.chatter = None
-        with open(cookies_path, 'r') as json_file:
-            self.cookies = json.load(json_file)
+        try:
+            with open(cookies_path, 'r') as json_file:
+                self.cookies = json.load(json_file)
+        except FileNotFoundError as err:
+            raise FileNotFoundError("Provided full path is {}".format(os.path.abspath(cookies_path)))
         self.new_chat(promt)
 
     def new_chat(self, promt):
@@ -86,7 +90,7 @@ class CowGPT(Chatter):
 
 
 async def _main():
-    cookies_path = r'C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json'
+    cookies_path = r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json"
     prompt = "You are an english teacher and you need to explain teachable way:"
     bot = EdgeGPT(cookies_path=cookies_path, promt=prompt)
     print('prompt {}'.format(prompt))

@@ -9,7 +9,7 @@ import streamlit as st
 from streamlit_chat import message
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-from chats.chatters import CowGPT
+from chats.chatters import CowGPT, EdgeGPT
 
 # from .agi.chat_gpt import create_gpt_completion
 # from .stt import show_voice_input
@@ -26,7 +26,9 @@ def clear_chat() -> None:
     st.session_state.past = []
     st.session_state.messages = []
     st.session_state.user_text = ""
-    st.session_state.seed = randrange(10 ** 8)  # noqa: S311
+    st.session_state.seed = randrange(10 ** 8)
+    global bot
+    bot = None
 
 
 def show_text_input() -> None:
@@ -73,7 +75,6 @@ def show_chat(ai_content: str, user_text: str) -> None:
         st.session_state.past.append(user_text)
         st.session_state.generated.append(ai_content)
     if st.session_state.generated:
-        print("\n\n\n\n\n\nLEN", len(st.session_state.generated))
         for i in range(len(st.session_state.generated)):
             message(st.session_state.past[i], is_user=True, key=str(i) + "_user", seed=st.session_state.seed)
             message(st.session_state.generated[i], key=str(i), seed=st.session_state.seed)
@@ -90,16 +91,20 @@ def show_gpt_conversation() -> None:
         st.error(err)
 
 
-def create_gpt_completion(model_name, message):
+async def create_gpt_completion(model_name, message):
     """
     message sample [{'role': 'system', 'content': 'You are a female helpful assistant. Answer as concisely as possible.'},
      {'role': 'user', 'content': 'dd'}, {'role': 'user', 'content': 'dd'}]
     """
     global bot
     if bot:
-        return bot.add_reply(message[1]['content'])
+        reply = await bot.add_reply(message[1]['content'])
+        return reply
     elif model_name == 'EdgeGPT':
-        return '???'
+        bot = EdgeGPT(cookies_path=r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json",
+                      promt=message[0]['content'])
+        reply = await bot.add_reply(message[1]['content'])
+        return reply
     elif model_name == 'CowGPT':
         bot = CowGPT(promt=message[0]['content'])
         return bot.add_reply(message[1]['content'])
