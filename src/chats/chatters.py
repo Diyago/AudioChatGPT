@@ -3,7 +3,7 @@ import json
 import os
 from abc import ABC, abstractmethod
 
-from EdgeGPT import Chatbot, ConversationStyle
+from EdgeGPT import Chatbot, ConversationStyle, NotAllowedToAccess
 
 
 class Chatter(ABC):
@@ -32,7 +32,13 @@ class EdgeGPT(Chatter):
                 self.cookies = json.load(json_file)
         except FileNotFoundError as err:
             raise FileNotFoundError("Provided full path is {}".format(os.path.abspath(cookies_path)))
-        self.new_chat(promt)
+
+        try:
+            self.new_chat(promt)
+        except NotAllowedToAccess:
+            raise ConnectionRefusedError("Update cookies to Bing Search!")
+        except Exception as error:
+            raise error
 
     def new_chat(self, promt):
         if self.chatter is not None:

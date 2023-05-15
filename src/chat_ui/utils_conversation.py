@@ -1,3 +1,4 @@
+import asyncio
 import base64
 import os
 import pickle
@@ -17,7 +18,7 @@ from chats.chatters import CowGPT, EdgeGPT
 from constants import BUG_REPORT_URL, REPO_URL
 
 conversations_file = "conversations.pkl"
-
+async_models = ["EdgeGPT"]
 bot = None
 
 
@@ -82,7 +83,10 @@ def show_chat(ai_content: str, user_text: str) -> None:
 
 def show_gpt_conversation() -> None:
     try:
-        gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
+        if st.session_state.model in async_models:
+            gpt_reply = asyncio.run(create_gpt_completion(st.session_state.model, st.session_state.messages))
+        else:
+            gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
         if gpt_reply:
             show_chat(gpt_reply, st.session_state.user_text)
             # st.divider()
@@ -91,11 +95,7 @@ def show_gpt_conversation() -> None:
         st.error(err)
 
 
-async def create_gpt_completion(model_name, message):
-    """
-    message sample [{'role': 'system', 'content': 'You are a female helpful assistant. Answer as concisely as possible.'},
-     {'role': 'user', 'content': 'dd'}, {'role': 'user', 'content': 'dd'}]
-    """
+async def create_async_gpt_completion(model_name, message):
     global bot
     if bot:
         reply = await bot.add_reply(message[1]['content'])
@@ -104,6 +104,13 @@ async def create_gpt_completion(model_name, message):
         bot = EdgeGPT(cookies_path=r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json",
                       promt=message[0]['content'])
         reply = await bot.add_reply(message[1]['content'])
+        return reply
+
+
+def create_gpt_completion(model_name, message):
+    global bot
+    if bot:
+        reply = bot.add_reply(message[1]['content'])
         return reply
     elif model_name == 'CowGPT':
         bot = CowGPT(promt=message[0]['content'])
