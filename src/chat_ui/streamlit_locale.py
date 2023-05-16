@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List
 
-from constants import AI_ROLE_OPTIONS_EN, AI_ROLE_OPTIONS_RU
+from constants import ROLE_OPTIONS_EN, ROLE_OPTIONS_RU
 
 
 @dataclass
@@ -45,7 +45,7 @@ class Locale:
 
 # --- LOCALE SETTINGS ---
 en = Locale(
-    ai_role_options=AI_ROLE_OPTIONS_EN,
+    ai_role_options=ROLE_OPTIONS_EN,
     ai_role_prefix="You are a female",
     ai_role_postfix="Answer as concisely as possible.",
     title="Audio Talking",
@@ -68,7 +68,7 @@ en = Locale(
     radio_placeholder="Role Interaction",
     radio_text1="Select",
     radio_text2="Create",
-    stt_placeholder="To Hear The Voice Of AI Press Play",
+    stt_placeholder="Hear The Voice Of AI",
     footer_title="Support & Feedback",
     footer_option0="Chat",
     footer_option1="Info",
@@ -85,7 +85,7 @@ en = Locale(
 )
 
 ru = Locale(
-    ai_role_options=AI_ROLE_OPTIONS_RU,
+    ai_role_options=ROLE_OPTIONS_RU,
     ai_role_prefix="Вы девушка",
     ai_role_postfix="Отвечай максимально лаконично.",
     title="Audio Talking / Голосовое общение",
@@ -108,7 +108,7 @@ ru = Locale(
     radio_placeholder="Взаимодествие с Ролью",
     radio_text1="Выбрать",
     radio_text2="Создать",
-    stt_placeholder="Чтобы Услышать ИИ Нажми Кнопку Проигрывателя",
+    stt_placeholder="Услышьте ИИ",
     footer_title="Поддержка и Обратная Связь",
     footer_option0="Чат",
     footer_option1="Инфо",

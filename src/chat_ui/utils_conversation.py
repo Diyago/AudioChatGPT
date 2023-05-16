@@ -11,7 +11,7 @@ from streamlit_chat import message
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from chats.chatters import CowGPT, EdgeGPT
-
+from player.player import TextToAudio
 # from .agi.chat_gpt import create_gpt_completion
 # from .stt import show_voice_input
 # from .tts import show_audio_player
@@ -84,13 +84,13 @@ def show_chat(ai_content: str, user_text: str) -> None:
 def show_gpt_conversation() -> None:
     try:
         if st.session_state.model in async_models:
-            gpt_reply = asyncio.run(create_gpt_completion(st.session_state.model, st.session_state.messages))
+            gpt_reply = asyncio.run(create_async_gpt_completion(st.session_state.model, st.session_state.messages))
         else:
             gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
         if gpt_reply:
             show_chat(gpt_reply, st.session_state.user_text)
             # st.divider()
-            # show_audio_player(gpt_reply)
+            TextToAudio.text_to_audio(gpt_reply)
     except UnboundLocalError as err:
         st.error(err)
 

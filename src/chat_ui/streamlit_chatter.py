@@ -6,8 +6,6 @@ import streamlit as st
 from streamlit_option_menu import option_menu
 
 from constants import HEADER_STYLES
-# from src.utils.footer import show_donates, show_info
-# from src.utils.helpers import get_files_in_dir, get_random_img
 from streamlit_locale import en, ru
 # from src.styles.menu_styles import FOOTER_STYLES, HEADER_STYLES
 from utils_conversation import get_user_input, show_chat_buttons, show_conversation, show_info

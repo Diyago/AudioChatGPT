@@ -82,7 +82,7 @@ class CowGPT(Chatter):
         self.chatter = "Chatbot"
 
     def add_reply(self, message):
-        return "Moo-moo, moo-moo!!!"
+        return "Moo-moo, moo-moo"
 
     def close_chat(self):
         self.chatter = None
