@@ -84,7 +84,14 @@ def show_chat(ai_content: str, user_text: str) -> None:
 def show_gpt_conversation() -> None:
     try:
         if st.session_state.model in async_models:
-            gpt_reply = asyncio.run(create_async_gpt_completion(st.session_state.model, st.session_state.messages))
+            try:
+                gpt_reply = asyncio.get_event_loop().run_until_complete(
+                    create_async_gpt_completion(st.session_state.model, st.session_state.messages))
+            except RuntimeError:
+                # if there is no running event loop.
+                gpt_reply = asyncio.run(create_async_gpt_completion(st.session_state.model, st.session_state.messages))
+            except Exception as error:
+                raise error
         else:
             gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
         if gpt_reply:

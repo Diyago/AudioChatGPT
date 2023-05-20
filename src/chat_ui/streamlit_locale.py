@@ -12,9 +12,6 @@ class Locale:
     title: str
     language: str
     lang_code: str
-    donates: str
-    donates1: str
-    donates2: str
     chat_placeholder: str
     chat_run_btn: str
     chat_clear_btn: str
@@ -36,7 +33,6 @@ class Locale:
     footer_chat: str
     footer_channel: str
     responsibility_denial: str
-    donates_info: str
     tokens_count: str
     message_cost: str
     total_cost: str
@@ -51,9 +47,6 @@ en = Locale(
     title="Audio Talking",
     language="English",
     lang_code="en",
-    donates="Donates",
-    donates1="Russia",
-    donates2="World",
     chat_placeholder="Start Your Conversation With AI:",
     chat_run_btn="Ask",
     chat_clear_btn="Clear",
@@ -75,7 +68,6 @@ en = Locale(
     footer_chat="AudioChatGPT",
     footer_channel="AudioChatGPT",
     responsibility_denial="""Caution: there may be inaccuracies in the answers\n\n""",
-    donates_info="""Its free to go""",
     tokens_count="Tokens count: ",
     message_cost="Message cost: ",
     total_cost="Total cost of conversation: ",
@@ -91,9 +83,6 @@ ru = Locale(
     title="Audio Talking / Голосовое общение",
     language="Russian",
     lang_code="ru",
-    donates="Поддержать Проект",
-    donates1="Россия",
-    donates2="Остальной Мир",
     chat_placeholder="Начните Вашу Беседу с ИИ:",
     chat_run_btn="Спросить",
     chat_clear_btn="Очистить",
@@ -115,7 +104,6 @@ ru = Locale(
     footer_chat="Чат Разговорчики с ИИ",
     footer_channel="Канал Разговорчики с ИИ",
     responsibility_denial="""Осторожно: в ответах могут быть неточности\n\n""",
-    donates_info="""Its free to go""",
     tokens_count="Количество токенов: ",
     message_cost="Cтоимость сообщения: ",
     total_cost="Общая стоимость разговора: ",
