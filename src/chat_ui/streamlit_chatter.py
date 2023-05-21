@@ -1,8 +1,10 @@
+import sys
 from pathlib import Path
 from random import randrange
 from typing import Dict
 
 import streamlit as st
+from loguru import logger
 from streamlit_option_menu import option_menu
 
 from constants import HEADER_STYLES
@@ -33,6 +35,7 @@ AI_MODEL_OPTIONS: list[str] = [
 
 ]
 # Add a button to create a new conversation
+logger.add(sys.stdout, colorize=True, format="<green>{time}</green> <level>{message}</level>")
 
 st.set_page_config(page_title=PAGE_TITLE, page_icon=PAGE_ICON)
 
@@ -72,7 +75,7 @@ if 'input_field_key' not in st.session_state:
 def main() -> None:
     c1, c2 = st.columns(2)
     with c1, c2:
-        c1.selectbox(label=st.session_state.locale.select_placeholder1, key="model", options=AI_MODEL_OPTIONS)
+        c1.selectbox(label=st.session_state.locale.select_placeholder1, key="model", options=AI_MODEL_OPTIONS,)
         st.session_state.input_kind = c2.radio(
             label=st.session_state.locale.input_kind,
             options=(st.session_state.locale.input_kind_1, st.session_state.locale.input_kind_2),

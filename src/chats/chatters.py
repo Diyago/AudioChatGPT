@@ -1,9 +1,11 @@
 import asyncio
 import json
 import os
+import re
 from abc import ABC, abstractmethod
 
 from EdgeGPT import Chatbot, ConversationStyle, NotAllowedToAccess
+from loguru import logger
 
 
 class Chatter(ABC):
@@ -43,29 +45,50 @@ class EdgeGPT(Chatter):
     def new_chat(self, promt):
         if self.chatter is not None:
             self.close_chat()
-        self.promt = promt
+        self.promnt = promt
         self.is_first_reply = True
         self.chatter = Chatbot(cookies=self.cookies)
 
-    async def add_reply(self, message):
+    async def async_add_reply(self, message):
         if self.get_is_first_reply():
-            message = "{} \n\n {}".format(self.promt, message)
+            message = "{} \n\n {}".format(self.promnt, message)
 
-        reply = await self.chatter.ask(prompt=message,
-                                       conversation_style=ConversationStyle.creative,
-                                       wss_link="wss://sydney.bing.com/sydney/ChatHub")
-        return reply['item']['messages'][1]['text']
+        return await self.chatter.ask(prompt=message,
+                                      conversation_style=ConversationStyle.creative,
+                                      wss_link="wss://sydney.bing.com/sydney/ChatHub")
+
+    def add_reply(self, message):
+        try:
+            event_loop = asyncio.get_event_loop()
+            reply = event_loop.run_until_complete(self.async_add_reply(message))
+        except RuntimeError:
+            # if there is no running event loop.
+            reply = asyncio.run(self.async_add_reply(message))
+        except Exception as error:
+            raise error
+
+        if "text" not in reply['item']['messages'][1]:
+            logger.exception("EdgeGPT return empty respond!\n\n {}".format(reply), format="{time} {level} {message}")
+            return "EdgeGPT return empty respond!"
+        return self._fix_output(reply['item']['messages'][1]['text'])
 
     def close_chat(self):
         self.chatter.close()
         self.chatter = None
-        self.promt = None
+        self.promnt = None
 
     def get_is_first_reply(self):
         if self.is_first_reply == False:
             return False
         self.is_first_reply = False
         return True
+
+    @staticmethod
+    def _fix_output(output_txt: str) -> str:
+        output_txt = re.sub("\[\^[0-9]+\^\]", '', output_txt)
+        output_txt.replace(" , это Bing", "")
+        output_txt.replace(" , Bing", "")
+        return output_txt
 
 
 class CowGPT(Chatter):
@@ -77,7 +100,7 @@ class CowGPT(Chatter):
     def new_chat(self, promt=""):
         if self.chatter is not None:
             self.close_chat()
-        self.promt = promt
+        self.promnt = promt
         self.is_first_reply = True
         self.chatter = "Chatbot"
 
@@ -86,10 +109,10 @@ class CowGPT(Chatter):
 
     def close_chat(self):
         self.chatter = None
-        self.promt = None
+        self.promnt = None
 
     def get_is_first_reply(self):
-        if self.is_first_reply == False:
+        if not self.is_first_reply:
             return False
         self.is_first_reply = False
         return True

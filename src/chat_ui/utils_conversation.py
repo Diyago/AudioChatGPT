@@ -1,4 +1,3 @@
-import asyncio
 import base64
 import os
 import pickle
@@ -11,7 +10,6 @@ from streamlit_chat import message
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 from chats.chatters import CowGPT, EdgeGPT
-from player.player import TextToAudio
 # from .agi.chat_gpt import create_gpt_completion
 # from .stt import show_voice_input
 # from .tts import show_audio_player
@@ -29,7 +27,8 @@ def clear_chat() -> None:
     st.session_state.user_text = ""
     st.session_state.seed = randrange(10 ** 8)
     global bot
-    bot = None
+    if bot is not None:
+        bot.close_chat()
 
 
 def show_text_input() -> None:
@@ -83,35 +82,16 @@ def show_chat(ai_content: str, user_text: str) -> None:
 
 def show_gpt_conversation() -> None:
     try:
-        if st.session_state.model in async_models:
-            try:
-                gpt_reply = asyncio.get_event_loop().run_until_complete(
-                    create_async_gpt_completion(st.session_state.model, st.session_state.messages))
-            except RuntimeError:
-                # if there is no running event loop.
-                gpt_reply = asyncio.run(create_async_gpt_completion(st.session_state.model, st.session_state.messages))
-            except Exception as error:
-                raise error
-        else:
-            gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
+        gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
         if gpt_reply:
-            show_chat(gpt_reply, st.session_state.user_text)
-            # st.divider()
-            TextToAudio.text_to_audio(gpt_reply)
+            if "user_text" in st.session_state.user_text:
+                show_chat(gpt_reply, st.session_state.user_text)
+            else:
+                show_chat(gpt_reply, "")
+            st.divider()
+            # TextToAudio.text_to_audio(gpt_reply)
     except UnboundLocalError as err:
         st.error(err)
-
-
-async def create_async_gpt_completion(model_name, message):
-    global bot
-    if bot:
-        reply = await bot.add_reply(message[1]['content'])
-        return reply
-    elif model_name == 'EdgeGPT':
-        bot = EdgeGPT(cookies_path=r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json",
-                      promt=message[0]['content'])
-        reply = await bot.add_reply(message[1]['content'])
-        return reply
 
 
 def create_gpt_completion(model_name, message):
@@ -122,6 +102,12 @@ def create_gpt_completion(model_name, message):
     elif model_name == 'CowGPT':
         bot = CowGPT(promt=message[0]['content'])
         return bot.add_reply(message[1]['content'])
+    elif model_name == 'EdgeGPT':
+        bot = EdgeGPT(cookies_path=r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json",
+                      promt=message[0]['content'])
+        return bot.add_reply(message[1]['content'])
+    else:
+        raise NotImplementedError("Model doesn't implemented: {}".format(model_name))
 
 
 def show_conversation() -> None:
