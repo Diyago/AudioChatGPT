@@ -1,6 +1,4 @@
 import asyncio
-import json
-import os
 import re
 from abc import ABC, abstractmethod
 
@@ -27,13 +25,8 @@ class Chatter(ABC):
 
 
 class EdgeGPT(Chatter):
-    def __init__(self, cookies_path, promt):
+    def __init__(self, promt):
         self.chatter = None
-        try:
-            with open(cookies_path, 'r') as json_file:
-                self.cookies = json.load(json_file)
-        except FileNotFoundError as err:
-            raise FileNotFoundError("Provided full path is {}".format(os.path.abspath(cookies_path)))
 
         try:
             self.new_chat(promt)
@@ -47,7 +40,7 @@ class EdgeGPT(Chatter):
             self.close_chat()
         self.promnt = promt
         self.is_first_reply = True
-        self.chatter = Chatbot(cookies=self.cookies)
+        self.chatter = Chatbot()
 
     async def async_add_reply(self, message):
         if self.get_is_first_reply():
@@ -59,17 +52,18 @@ class EdgeGPT(Chatter):
 
     def add_reply(self, message):
         try:
-            event_loop = asyncio.get_event_loop()
-            reply = event_loop.run_until_complete(self.async_add_reply(message))
-        except RuntimeError:
-            # if there is no running event loop.
-            reply = asyncio.run(self.async_add_reply(message))
-        except Exception as error:
-            raise error
+            loop = asyncio.get_running_loop()
+        except RuntimeError:  # 'RuntimeError: There is no current event loop...'
+            loop = None
 
+        if loop and loop.is_running():
+            tsk = loop.create_task(self.async_add_reply(message))
+            reply = tsk.result()
+        else:
+            reply = asyncio.run(self.async_add_reply(message))
         if "text" not in reply['item']['messages'][1]:
             logger.exception("EdgeGPT return empty respond!\n\n {}".format(reply), format="{time} {level} {message}")
-            return "EdgeGPT return empty respond!"
+            return "EdgeGPT returned empty respond!"
         return self._fix_output(reply['item']['messages'][1]['text'])
 
     def close_chat(self):
@@ -118,22 +112,22 @@ class CowGPT(Chatter):
         return True
 
 
-async def _main():
-    cookies_path = r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json"
+def _main():
+    # cookies_path = r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json"
     prompt = "You are an english teacher and you need to explain teachable way:"
-    bot = EdgeGPT(cookies_path=cookies_path, promt=prompt)
+    bot = EdgeGPT(promt=prompt)
     print('prompt {}'.format(prompt))
 
     asking = "Explain me something about conditional sentences?"
     print('asking {}'.format(asking))
-    response = await bot.add_reply(asking)
+    response = bot.add_reply(asking)
     print("reply: {}".format(response))
 
     asking = "Give me some examples"
     print('asking {}'.format(asking))
-    response = await bot.add_reply(asking)
+    response = bot.add_reply(asking)
     print("reply: {}".format(response))
 
 
 if __name__ == "__main__":
-    asyncio.run(_main())
+    _main()

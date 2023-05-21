@@ -84,10 +84,7 @@ def show_gpt_conversation() -> None:
     try:
         gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
         if gpt_reply:
-            if "user_text" in st.session_state.user_text:
-                show_chat(gpt_reply, st.session_state.user_text)
-            else:
-                show_chat(gpt_reply, "")
+            show_chat(gpt_reply, st.session_state.user_text)
             st.divider()
             # TextToAudio.text_to_audio(gpt_reply)
     except UnboundLocalError as err:
@@ -97,15 +94,15 @@ def show_gpt_conversation() -> None:
 def create_gpt_completion(model_name, message):
     global bot
     if bot:
-        reply = bot.add_reply(message[1]['content'])
+        reply = bot.add_reply(message[-1]['content'])
         return reply
     elif model_name == 'CowGPT':
         bot = CowGPT(promt=message[0]['content'])
-        return bot.add_reply(message[1]['content'])
+        return bot.add_reply(message[-1]['content'])
     elif model_name == 'EdgeGPT':
         bot = EdgeGPT(cookies_path=r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json",
                       promt=message[0]['content'])
-        return bot.add_reply(message[1]['content'])
+        return bot.add_reply(message[-1]['content'])
     else:
         raise NotImplementedError("Model doesn't implemented: {}".format(model_name))
 
