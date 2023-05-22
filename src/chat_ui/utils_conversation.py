@@ -83,6 +83,7 @@ def show_chat(ai_content: str, user_text: str) -> None:
 def show_gpt_conversation() -> None:
     try:
         gpt_reply = create_gpt_completion(st.session_state.model, st.session_state.messages)
+        st.session_state.messages.append({"role": "assistant", "content": gpt_reply})
         if gpt_reply:
             show_chat(gpt_reply, st.session_state.user_text)
             st.divider()
@@ -100,8 +101,7 @@ def create_gpt_completion(model_name, message):
         bot = CowGPT(promt=message[0]['content'])
         return bot.add_reply(message[-1]['content'])
     elif model_name == 'EdgeGPT':
-        bot = EdgeGPT(cookies_path=r"C:\Users\dex\Desktop\gpt4free\AudioChatGPT\configs\cookies_edge.json",
-                      promt=message[0]['content'])
+        bot = EdgeGPT(promt=message[0]['content'])
         return bot.add_reply(message[-1]['content'])
     else:
         raise NotImplementedError("Model doesn't implemented: {}".format(model_name))

@@ -3,7 +3,6 @@ import re
 from abc import ABC, abstractmethod
 
 from EdgeGPT import Chatbot, ConversationStyle, NotAllowedToAccess
-from loguru import logger
 
 
 class Chatter(ABC):
@@ -62,17 +61,28 @@ class EdgeGPT(Chatter):
         else:
             reply = asyncio.run(self.async_add_reply(message))
         if "text" not in reply['item']['messages'][1]:
-            logger.exception("EdgeGPT return empty respond!\n\n {}".format(reply), format="{time} {level} {message}")
             return "EdgeGPT returned empty respond!"
         return self._fix_output(reply['item']['messages'][1]['text'])
 
     def close_chat(self):
-        self.chatter.close()
+        try:
+            loop = asyncio.get_running_loop()
+        except RuntimeError:  # 'RuntimeError: There is no current event loop...'
+            loop = None
+
+        if loop and loop.is_running():
+            tsk = loop.create_task(self.chatter.close())
+            tsk.result()
+        else:
+            asyncio.run(self.chatter.close())
         self.chatter = None
         self.promnt = None
 
+    async def async_close_bot(self):
+        await self.chatter.close()
+
     def get_is_first_reply(self):
-        if self.is_first_reply == False:
+        if not self.is_first_reply:
             return False
         self.is_first_reply = False
         return True
