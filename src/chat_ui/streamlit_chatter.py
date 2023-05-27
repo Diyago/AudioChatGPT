@@ -73,6 +73,9 @@ if 'input_field_key' not in st.session_state:
 
 
 def main() -> None:
+    """
+    Main function to display the user interface and handle user interactions.
+    """
     c1, c2 = st.columns(2)
     with c1, c2:
         c1.selectbox(label=st.session_state.locale.select_placeholder1, key="model", options=AI_MODEL_OPTIONS,)
@@ -101,6 +104,9 @@ def main() -> None:
 
 
 def run_agi():
+    """
+    Run the AudioChatGPT interface based on the selected language and display the appropriate content.
+    """
     match selected_lang:
         case "En":
             st.session_state.locale = en
